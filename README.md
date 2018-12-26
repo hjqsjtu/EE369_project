@@ -1,54 +1,25 @@
 # 2048-api
-A 2048 game api for training supervised learning (imitation learning) or reinforcement learning agents
+EE369 课程作业：2048游戏神经网络代理 NNAgent
 
 # Code structure
 * [`game2048/`](game2048/): the main package.
     * [`game.py`](game2048/game.py): the core 2048 `Game` class.
-    * [`agents.py`](game2048/agents.py): the `Agent` class with instances.
-    * [`displays.py`](game2048/displays.py): the `Display` class with instances, to show the `Game` state.
-    * [`expectimax/`](game2048/expectimax): a powerful ExpectiMax agent by [here](https://github.com/nneonneo/2048-ai).
-* [`explore.ipynb`](explore.ipynb): introduce how to use the `Agent`, `Display` and `Game`.
-* [`static/`](static/): frontend assets (based on Vue.js) for web app.
-* [`webapp.py`](webapp.py): run the web app (backend) demo.
-* [`evaluate.py`](evaluate.py): evaluate your self-defined agent.
+    * [`agents.py`](game2048/agents.py): 基于tflearn神经网络的智能代理.
+    * [`displays.py`](game2048/displays.py): 课程项目提供的原始显示类.
+    * [`expectimax/`](game2048/expectimax): ExpectiMax，课程提供的训练监督用代理.
+* ['model/'](model/):
+	* [`SJTU_EE369_HJQ.model`](SJTU_EE369_HJQ.model):已经训练的模型
+* [`evaluate.py`](evaluate.py): 智能代理评估器.
 
-# Requirements
-* code only tested on linux system (ubuntu 16.04)
-* Python 3 (Anaconda 3.6.3 specifically) with numpy and flask
+#  Requirements
+* 参见requirements.txt文件
 
-# To define your own agents
-```python
-from game2048.agents import Agent
+# 测试代理
+python evaluate.py>my.log
 
-class YourOwnAgent(Agent):
-
-    def step(self):
-        '''To define the agent's 1-step behavior given the `game`.
-        You can find more instance in [`agents.py`](game2048/agents.py).
-        
-        :return direction: 0: left, 1: down, 2: right, 3: up
-        '''
-        direction = some_function(self.game)
-        return direction
-
-```
-
-# To compile the pre-defined ExpectiMax agent
-
-```bash
-cd game2048/expectimax
-bash configure
-make
-```
-
-# To run the web app
-```bash
-python webapp.py
-```
-![demo](preview2048.gif)
+# 印记生成
+python # 测试代理
+python generate_fingerprint.py
 
 # LICENSE
 The code is under Apache-2.0 License.
-
-# For EE369 students from SJTU only
-Please read [here](EE369.md).
