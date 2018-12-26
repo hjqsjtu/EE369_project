@@ -1,47 +1,54 @@
-![Game 2048](https://image.ibb.co/g1GrCz/2048_logo.png)
+# 2048-api
+A 2048 game api for training supervised learning (imitation learning) or reinforcement learning agents
 
-# Game 2048 AI #
+# Code structure
+* [`game2048/`](game2048/): the main package.
+    * [`game.py`](game2048/game.py): the core 2048 `Game` class.
+    * [`agents.py`](game2048/agents.py): the `Agent` class with instances.
+    * [`displays.py`](game2048/displays.py): the `Display` class with instances, to show the `Game` state.
+    * [`expectimax/`](game2048/expectimax): a powerful ExpectiMax agent by [here](https://github.com/nneonneo/2048-ai).
+* [`explore.ipynb`](explore.ipynb): introduce how to use the `Agent`, `Display` and `Game`.
+* [`static/`](static/): frontend assets (based on Vue.js) for web app.
+* [`webapp.py`](webapp.py): run the web app (backend) demo.
+* [`evaluate.py`](evaluate.py): evaluate your self-defined agent.
 
-This is an artificial intelligence project. Pretend using AI techniques to play the 2048's game.
-It is based on training through simple heuristics of road exploration.
+# Requirements
+* code only tested on linux system (ubuntu 16.04)
+* Python 3 (Anaconda 3.6.3 specifically) with numpy and flask
 
-It is based on the training of a neural network (thanks tflearn) by means of simple heuristics of road exploration.
+# To define your own agents
+```python
+from game2048.agents import Agent
 
-The results obtained are:
+class YourOwnAgent(Agent):
 
- <working on it>
-
-# Pre-requisites
+    def step(self):
+        '''To define the agent's 1-step behavior given the `game`.
+        You can find more instance in [`agents.py`](game2048/agents.py).
+        
+        :return direction: 0: left, 1: down, 2: right, 3: up
+        '''
+        direction = some_function(self.game)
+        return direction
 
 ```
-pip3 install -r requirements.txt
+
+# To compile the pre-defined ExpectiMax agent
+
+```bash
+cd game2048/expectimax
+bash configure
+make
 ```
 
-## How to train: ##
+# To run the web app
+```bash
+python webapp.py
+```
+![demo](preview2048.gif)
 
-- Execute: `python3 Game2048 train`
-- First it will generate training games with an exploration algorithm.
-- You could stop this games when you think (but the default amount of games are a really good option).
-- When it generates all the training data, it start training the neural network.
+# LICENSE
+The code is under Apache-2.0 License.
 
-Note: If you want to re-train your neural network without generating more training games just execute: `python3 Game2048 train --games=0`
-
-## How to test: ##
-
-- Execute `python3 Game2048 play`
-- If you want to see more games just change the command to: `python3 Game2048 play --games=10`
-
-## How to play the game manually: ##
-
- - Execute `python3 Game2048 play --heuristic=manual`
-
-## Credits: ##
-
- The base code of the Game (not the artificial intelligence) was made by [yangshun](https://github.com/yangshun/2048-python).
- I made some changes on the code, mainly to adapt it to play and train the neuronal network.
-
- The rest of the code has been created entirely by Fernando Pérez (@fernaperg).
-
-## LICENSE: ##
-
- This code is free to use, but look carefully at the [LICENSE](LICENSE) file.
+# For EE369 students from SJTU only
+Please read [here](EE369.md).
