@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/mylinux123/PycharmProjects/First/2048-api-master/SJTU_HJQ2048.model"
+all_model_checkpoint_paths: "/home/mylinux123/PycharmProjects/First/2048-api-master/SJTU_HJQ2048.model"
