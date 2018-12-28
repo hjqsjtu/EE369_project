@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
     '''====================
     Use your own agent here.'''
-    from game2048.agents1 import NNAgent as TestAgent
+    from game2048.myagents import NNAgent as TestAgent
     '''===================='''
 
     fingerprint = generate_fingerprint(TestAgent)
