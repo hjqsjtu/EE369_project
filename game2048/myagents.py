@@ -93,7 +93,7 @@ class NNAgent(Agent):
         self.network = None
         self.modelisloaded = False
         # model has been trained ok to be used in step()
-        self.trainedok = False
+        self.trainedok = True
         # trained and save model into a existed file
         self.train_continue = True
         # load sample data from file
@@ -105,9 +105,8 @@ class NNAgent(Agent):
         tf.reset_default_graph()
         if self.trainedok:
             self.create_network(20)
-            # self.model.reset_default_graph()
             try:
-                self.model.load('{}.model'.format('NN_CUSTOM_2048'),weights_only=True)
+                self.model.load('./model/{}.model'.format('NN_CUSTOM_2048'), weights_only=True)
                 self.modelisloaded = True
             except Exception as e:
                 print('Model not found')
@@ -121,7 +120,7 @@ class NNAgent(Agent):
             # self.init_gens('expect_move')
             self.gen_sample(filename)
         self.train_model()
-        self.model.save('{}.model'.format('NN_CUSTOM_2048'))
+        self.model.save('./model/{}.model'.format('NN_CUSTOM_2048'))
 
     def step(self):
         if not self.modelisloaded:
@@ -306,8 +305,7 @@ class NNAgent(Agent):
         self.create_network(input_size=len(x_data[0]))
         if self.train_continue:
             try:
-                # self.model.load('{}.model'.format('NN_CUSTOM_2048'), weights_only=True)
-                self.model.load('{}.model'.format('NN_CUSTOM_2048'))
+                self.model.load('../model/{}.model'.format('NN_CUSTOM_2048'))
             except Exception as e:
                 pass
         # validation_set=0.05,All_data*0.05 be validation data
