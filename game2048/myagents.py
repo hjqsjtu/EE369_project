@@ -1,6 +1,7 @@
 # -*-coding:utf-8-*-
 import numpy as np
-import config as conf
+from .game import  Game
+from .config import *
 import numpy.lib.format as fmt
 
 import random
@@ -17,7 +18,6 @@ from collections import Counter
 from tflearn.callbacks import Callback
 import statistics
 
-from game2048.game import Game
 
 
 class Agent:
@@ -88,7 +88,6 @@ class NNAgent(Agent):
         if game.size != 4:
             raise ValueError("`%s` can only work with game of `size` 4." % self.__class__.__name__)
         super().__init__(game,display)
-
         self.model = None
         self.network = None
         self.modelisloaded = False
@@ -114,6 +113,7 @@ class NNAgent(Agent):
 
     def train(self):
         filename = 'expect_move'
+        # filename = 'explorer';
         if self.traindata_canload:
             self.training_data = np.load('{}.npy'.format(filename)).tolist()
         else:
@@ -129,7 +129,7 @@ class NNAgent(Agent):
         obs_his0 = np.concatenate(self.game.board, axis=0)
         obs_his = obs_his0
         prev_args = [self.emptycelss(self.game), self.monotonicity(self.game), self.smoothness(self.game),
-                     5*np.log2(self.game.score + (self.game.score == 0))]
+                     10*np.log2(self.game.score + (self.game.score == 0))]
         obs_his = np.log2(obs_his + (obs_his == 0))
         prev_observation = np.concatenate([obs_his, prev_args], axis=0)
         prev_observation = (prev_observation - mean(prev_observation)) / statistics.stdev(prev_observation)
@@ -138,15 +138,17 @@ class NNAgent(Agent):
         tmpgame = copy.deepcopy(self.game)
         done = False
         for i in range(len(prediction)):
-            action = conf.options[prediction[i]]
+            action = options[prediction[i]]
             tmpgame.move(action)
             if not equals_grid(np.concatenate(tmpgame.board, axis=0), obs_his0):
                 done = True
                 break
+
         if done:
             return action
         else:
-            return -1
+            #return -1
+            return np.random.randint(0, 10000) % 4;
 
     def gen_sample(self, heuristic='explorer'):
         self.training_data = []
@@ -159,7 +161,7 @@ class NNAgent(Agent):
         k = 0
         print('Starting to generating data ...')
         try:
-            while i < conf.initial_games or len(self.accepted_scores) < int(conf.initial_games * 0.2):
+            while i < initial_games or len(self.accepted_scores) < int(initial_games * 0.2):
                 score = 0
                 action = 0
                 game_memory = []
@@ -170,24 +172,24 @@ class NNAgent(Agent):
                 if heuristic == 'expect_move':
                     localagent = ExpectiMaxAgent(self.game)
                 k = 0
-                for k in range(conf.goal_steps):
+                for k in range(goal_steps):
                     prev_observation = np.concatenate(self.game.board, axis=0)
-                    prev_args = [self.emptycelss(self.game), self.monotonicity(self.game), self.smoothness(self.game), 5*np.log2(self.game.score + (self.game.score == 0)) ]
+                    prev_args = [self.emptycelss(self.game), self.monotonicity(self.game), self.smoothness(self.game), 10*np.log2(self.game.score + (self.game.score == 0)) ]
                     invalid_moves = []
                     while equals_grid(np.concatenate(self.game.board, axis=0), prev_observation):
                         if heuristic == 'random':
-                            move = [x for x in conf.options if x not in invalid_moves]
+                            move = [x for x in options if x not in invalid_moves]
                             action = random.choice(move)
                         elif heuristic == 'expect_move':
                             action = localagent.step()
                         elif heuristic == 'corner':
-                            action = corner_choice(self.game.board, conf.options, invalid_moves)
+                            action = corner_choice(self.game.board, options, invalid_moves)
                         elif heuristic == 'one_corner':
-                            action = left_down_corner_choice(self.game.board, conf.options, invalid_moves)
+                            action = left_down_corner_choice(self.game.board, options, invalid_moves)
                         elif heuristic == 'explorer':
-                            action, _ = explorer_move(self.game, conf.options, 3)  # Max depth == 3
+                            action, _ = explorer_move(self.game, options, 5)  # Max depth == 3
                             if action in invalid_moves:  # Just in case i   t fail
-                                action = random.choice([x for x in conf.options if x not in invalid_moves])
+                                action = random.choice([x for x in options if x not in invalid_moves])
                         invalid_moves.append(action)
                         self.game.move(action)
                         continued = self.game.end
@@ -204,19 +206,19 @@ class NNAgent(Agent):
                     game_memory.append([prev_observation, action])
                     # score += self.game.score - score  # How much we win with this move
                     score = self.game.score
-                    save_score = score >= conf.score_requirement
+                    save_score = score >= score_requirement
                     k += 1
                     if done or save_score:
                         break
 
-                save_score = score >= conf.score_requirement
+                save_score = score >= score_requirement
                              # and self.reach2048()
                 if save_score:
                     self.accepted_scores.append(score)
                     j += 1
                     for data in game_memory:
                         output = [0, 0, 0, 0]
-                        output[conf.options.index(data[1])] = 1
+                        output[options.index(data[1])] = 1
                         self.training_data.append([data[0], output])
 
                 self.scores.append(score)
@@ -224,12 +226,12 @@ class NNAgent(Agent):
                 print('Game: {}, Passed: {}/{}, Steps:{},Score: {}, Saved: {}'.format(i, len(self.accepted_scores),
                                                                              i, k, score, save_score))
                 print('a: {}%, s: {}%, d: {}%, w: {}%'.format(
-                    round(choices.count(conf.options[0]) / len(choices) * 100, 2),
-                    round(choices.count(conf.options[1]) / len(choices) * 100, 2),
-                    round(choices.count(conf.options[2]) / len(choices) * 100, 2),
-                    round(choices.count(conf.options[3]) / len(choices) * 100, 2)
+                    round(choices.count(options[0]) / len(choices) * 100, 2),
+                    round(choices.count(options[1]) / len(choices) * 100, 2),
+                    round(choices.count(options[2]) / len(choices) * 100, 2),
+                    round(choices.count(options[3]) / len(choices) * 100, 2)
                 ))
-                self.game = Game(4, conf.score_requirement)
+                self.game = Game(4, score_requirement)
         except KeyboardInterrupt as e:
             print('Training stoped')
             if i > 0:
@@ -305,7 +307,7 @@ class NNAgent(Agent):
         self.create_network(input_size=len(x_data[0]))
         if self.train_continue:
             try:
-                self.model.load('../model/{}.model'.format('NN_CUSTOM_2048'))
+                self.model.load('./model/{}.model'.format('NN_CUSTOM_2048'))
             except Exception as e:
                 pass
         # validation_set=0.05,All_data*0.05 be validation data
@@ -318,7 +320,7 @@ class NNAgent(Agent):
             #                n_epoch=50, snapshot_step=1000, validation_set=0.05,
             #                shuffle=True, batch_size=64, run_id='SJTU_HJQGAME2048')
             self.model.fit({'input': x_data}, {'targets': y_data},
-                           n_epoch=800, snapshot_step=500, validation_set=0.15,
+                           n_epoch=200, snapshot_step=500, validation_set=0.15,
                            shuffle=True, batch_size=32, show_metric=True, run_id='SJTU_HJQGAME2048',
                            callbacks=early_stopping_cb)
         except StopIteration as e:
@@ -435,9 +437,9 @@ class NNAgent(Agent):
         self.network = dropout(self.network, 0.8)
 
         self.network = fully_connected(self.network, 4, activation='softmax')
-        optim = adam(learning_rate=conf.LR, beta1=0.9, beta2=0.999,
+        optim = adam(learning_rate=LR, beta1=0.9, beta2=0.999,
                  epsilon=1e-1, use_locking=False, name="Adam")
-        self.network = regression(self.network, optimizer=optim, learning_rate=conf.LR, loss='categorical_crossentropy', name='targets')
+        self.network = regression(self.network, optimizer=optim, learning_rate=LR, loss='categorical_crossentropy', name='targets')
 
         self.model = tflearn.DNN(self.network, tensorboard_dir='log')
 
