@@ -7,7 +7,7 @@ def single_run(size, score_to_win, AgentClass, **kwargs):
     game = Game(size, score_to_win)
     agent = AgentClass(game, display=Display(), **kwargs)
     agent.play(verbose=True)
-    return game.ttscore
+    return game.score
 
 
 if __name__ == '__main__':
@@ -26,3 +26,4 @@ if __name__ == '__main__':
                            AgentClass=TestAgent)
         scores.append(score)
     print("Average scores: @%s times" % N_TESTS, sum(scores) / len(scores))
+
